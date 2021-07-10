@@ -1,0 +1,4 @@
+void loop{
+	for(i=0; i<2; i++){
+	boolean state = digitalRead(pin_button[i]);
+	digitalWrite(pins_LED[i], state);
