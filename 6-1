@@ -1,0 +1,6 @@
+void loop{
+	for(i=0; i<4; i++)
+	{
+	Serial.println(digitalRead(buttons[i]);
+	Serial.print("");
+	}
