@@ -1,0 +1,4 @@
+void loop{
+	Serial.Println(digitalRead(vResistor);
+	delay(1000);
+	}
