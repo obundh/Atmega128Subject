@@ -1,0 +1,12 @@
+7-2
+//가변저항 값으로 LED 개수 조절
+void loop{
+	
+	int adc = analogRead(vResistor);
+	int count_led = (adc >>8 ) +1;
+	for(i=0; i<4; i++){
+	if(i< count_led)
+	digitalWrite(pins_LED[i], HIGH);
+	else
+	digitalWrite(pins_LED[i], LOW);
+	}
