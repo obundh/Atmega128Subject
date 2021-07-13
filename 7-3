@@ -1,0 +1,9 @@
+7-3
+//B LED 밝기 제어
+void loop{
+	digitalWrite(RGB_LED[1], HIGH);
+	digitalWrite(RPG_LED[2], HIGH);
+	for(int i= 2500; i>=0; i--){
+	analoagWrite(RGB_LED[0], i);
+	delay(10);
+	}
