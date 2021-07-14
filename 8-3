@@ -1,0 +1,12 @@
+8-3
+
+void loop{
+	time_current = millis();
+	count++;
+	if(time_current - time_previous >= 1000){
+	time_previous = time_current;
+	LED_state = !LED_state;
+	digitalWrite(pin_LED, LED_state);
+	Serial.println(count);
+	}
+}
