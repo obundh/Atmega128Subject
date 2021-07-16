@@ -1,0 +1,13 @@
+//7.2
+
+//2,3,4,5번핀 LED 연결
+//밝기 0 -> 밝기 255 까지 가는데 
+//0% 25% 50% 75% 순으로 돌림
+
+void loop() {
+	for(int i=0; i <4; i++){
+	brightness[i]++;
+	if(brightness[i] > 255) brightness[i] = 0;
+	analogWrite(pins_LED[i], brightness[i])}
+	}
+	
