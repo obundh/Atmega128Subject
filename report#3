@@ -1,0 +1,42 @@
+
+#include <mega128.h>
+#include <delay.h>
+                                              
+flash unsigned char seg_pat[10]= {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
+flash unsigned char  led[8] = {0xFE, 0xFD, 0xFB, 0xF7, 0xEF, 0xDF, 0xBF, 0x7F };
+
+void main(void)
+{               
+    unsigned char oldkey, key, num = 0;     
+    int i;
+          
+    DDRC = 0xFF;
+    DDRB = 0xF0; 
+    DDRD = 0xF0;
+    DDRG = 0x0F;
+    DDRE = 0x0;
+                
+    PORTC = 0xFF;
+    PORTG = 0b00001000;
+    PORTB = 0x0; 
+    PORTD = 0x0;  
+
+    oldkey = PINE & 0b00010000;
+    
+    while(1){     
+        PORTD = ((seg_pat[num] & 0x0F) << 4) | (PORTD & 0x0F); 
+        PORTB = (seg_pat[num] & 0x70 ) | (PORTB & 0x0F); 
+        
+        key = PINE & 0b00010000; 
+
+        if(oldkey != 0 && key == 0){  
+            num = (num + 1) % 10;  
+            for(i=0;i<8;i++)
+            {
+            PORTC = led[i];    
+            delay_ms(100);
+            }
+        }  
+        oldkey = key; 
+    }
+}
