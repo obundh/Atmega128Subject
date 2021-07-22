@@ -1,0 +1,62 @@
+
+#include <mega128.h>
+#include <delay.h>
+
+unsigned char led =0XFE;
+unsigned char cnt = 0;
+unsigned char i = 0;
+void main(void)
+{
+
+    DDRC = 0XFF;
+   
+    PORTC = led; 
+    
+    TIMSK = 0x02; 00000010 CTC 모드
+    TCCR0 =0x0F;// 00001111 ctc모드
+    OCR0 = 155; //10ms   
+    TCNT0 = 0;
+
+    EIMSK = 0b00110000;
+    EICRB = 0b00001010;   
+    SREG = 0x80;
+
+    while(1);
+  
+}
+
+interrupt [EXT_INT4] void ext_int4(void)
+{    
+    i=1;
+}
+
+interrupt [EXT_INT5] void ext_int5(void)
+{    
+    i=2;
+}
+
+interrupt [TIM0_COMP] void timer_int0(void)
+{
+    if(i==1){
+        cnt++;
+        if(cnt==50){ // 1/16us * 1024 * (1+155) *50 = 0.5s
+        led = led << 1; // 1비트 쉬프트
+        led = led | 0x01; // 최하위 비트 셋
+        if(led == 0xFF) led = 0xFE; // 모두 off이면 초기값 재설정
+        PORTC = led;
+        cnt=0;
+        }
+    }
+     
+    if(i==2){
+        cnt++;
+        if(cnt==100){ // 1/16us * 1024 * (1+155) * 100 = 1s
+        led = led << 1; // 1비트 쉬프트
+        led = led | 0x01; // 최하위 비트 셋
+        if(led == 0xFF) led = 0xFE; // 모두 off이면 초기값 재설정
+        PORTC = led;
+  
+          cnt=0;
+        }
+    }
+}
