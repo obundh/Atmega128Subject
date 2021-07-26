@@ -1,0 +1,121 @@
+#include <mega128.h>       
+#include <delay.h>
+
+typedef unsigned char u_char;
+
+#define ENABLE     PORTA.2     // Enable(펄스)
+
+#define FUNCSET    0x28    // Function Set
+#define ENTMODE    0x06    // Entry Mode Set
+#define ALLCLR    0x01    // All Clear
+#define DISPON    0x0c     // Display On                      
+#define LSHIFT    0x18    // Display Left Shift    
+#define HOME    0x02    // Cursor Home
+
+flash unsigned char cg_pat[24] =
+            {0x1D, 0x05, 0x05, 0x05, 0x0F, 0x09, 0x09, 0x0F, // 김
+             0x1F, 0x10, 0x1F, 0x04, 0x1F, 0x0E, 0x11, 0x0E, // 동
+             0x04, 0x1F, 0x0E, 0x0E, 0x1F, 0x04, 0x10, 0x1F}; // 훈
+
+void LCD_init(void);            // LCD 초기화
+void LCD_String(char flash *);  // 문자열 출력
+void Busy(void);                // 2ms 딜레이
+void Command(u_char);           // 명령어 전송
+void Data(u_char);              // 데이터 전송
+
+void main(void)
+{                         
+    int i;
+   
+    LCD_init();      
+       
+    // 첫 번째 라인에 출력
+    for(i = 0;i < 24;i++){
+         Command(0x40 + i);      // CGRAM 패턴 등록 
+         Data(cg_pat[i]);
+    }
+       
+    Command(HOME);              // DDRAM 선택
+    LCD_String(" My Name is ");
+    Data(0x00);            // '김' 또는 0x08
+    Data(0x01);            // '동' 또는 0x09
+    Data(0x02);            // '훈' 또는 0x0A
+}
+
+// LCD 초기화 
+void LCD_init(void)
+{      
+    DDRA = 0xFF;            // 포트 A 출력 설정
+    PORTA = 0x0;           
+                 
+    delay_ms(15);
+    Command(0x20);
+    delay_ms(5);
+    Command(0x20);
+    delay_us(100);
+    Command(0x20);
+    Command(FUNCSET);
+    Command(DISPON);
+    Command(ALLCLR);
+    Command(ENTMODE);
+}
+
+// 문자열 출력 함수
+void LCD_String(char flash *str)
+{
+    char flash *pStr=0;
+   
+    pStr = str;   
+    while(*pStr) Data(*pStr++);
+}                                    
+
+// 인스트럭션 쓰기 함수
+void Command(u_char byte)
+{
+    Busy();
+
+    // 인스트럭션 상위 바이트 
+    PORTA = 0x00;           // RS=RW=0
+    PORTA |= (byte & 0xF0); // 명령어 상위 4비트
+    delay_us(1);    
+    ENABLE = 1;                // E = 1
+    delay_us(1);
+    ENABLE = 0;                // E = 0
+
+    // 인스트럭션 하위 바이트
+    PORTA = 0x00;           // RS=RW=0
+    PORTA |= (byte << 4);   // 명령어 하위 4비트
+    delay_us(1);    
+    ENABLE = 1;                // E = 1
+    delay_us(1);
+    ENABLE = 0;                // E = 0
+}
+                   
+//데이터 쓰기 함수
+void Data(u_char byte)
+{
+    Busy();
+       
+    // 데이터 상위 바이트
+    PORTA = 0x01;           // RS=1, RW=0
+    PORTA |= (byte & 0xF0); // 데이터 상위 4비트
+    delay_us(1);    
+    ENABLE = 1;                // E = 1
+    delay_us(1);
+    ENABLE = 0;                // E = 0
+
+    // 데이터 하위 바이트
+    PORTA = 0x01;           // RS=1, RW=0
+    PORTA |= (byte << 4);   // 데이터 하위 4비트
+    delay_us(1);    
+    ENABLE = 1;                // E = 1
+    delay_us(1);
+    ENABLE = 0;                // E = 0
+}
+
+// Busy Flag Check -> 일반적인 BF를 체크하는 것이 아니라
+// 일정한 시간 지연을 이용한다.
+void Busy(void)
+{
+    delay_ms(2);
+}
